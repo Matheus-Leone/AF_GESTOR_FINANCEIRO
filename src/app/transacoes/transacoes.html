@@ -1,76 +1,282 @@
-<h1>Transações</h1>
+<div class="container transacoes-page">
 
-<section class="card">
-  <h2>Nova Transação</h2>
-
-  <form (ngSubmit)="criar()" class="form-grid">
-    <div class="form-control">
-      <label for="tipo">Tipo</label>
-      <input id="tipo" name="tipo" [(ngModel)]="tipo" required />
+  <!-- Cabeçalho -->
+  <div class="row mb-4 align-items-center">
+    <div class="col">
+      <h1 class="h3 mb-1 fw-semibold">Transações</h1>
+      <p class="text-muted mb-0">
+        Cadastre, edite e acompanhe suas movimentações financeiras.
+      </p>
     </div>
 
-    <div class="form-control">
-      <label for="nome">Nome</label>
-      <input id="nome" name="nome" [(ngModel)]="nome" required />
+    <div class="col-auto">
+      <button
+        class="btn btn-outline-secondary d-flex align-items-center gap-2"
+        (click)="carregar()"
+        [disabled]="carregando"
+      >
+        @if (!carregando) {
+          <span>Recarregar lista</span>
+        } @else {
+          <span class="spinner-border spinner-border-sm" role="status"></span>
+          <span>Carregando...</span>
+        }
+      </button>
     </div>
+  </div>
 
-    <div class="form-control">
-      <label for="valor">Valor</label>
-      <input id="valor" type="number" name="valor" [(ngModel)]="valor" required />
-    </div>
+  <div class="row g-4">
+    <!-- Coluna esquerda: Formulário -->
+    <div class="col-12 col-lg-4">
+      <div class="card card-form shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h5 mb-0">
+              {{ editandoId ? 'Editar Transação' : 'Nova Transação' }}
+            </h2>
 
-    <div class="form-control">
-      <label for="categoria">Categoria</label>
-      <input id="categoria" name="categoria" [(ngModel)]="categoria" required />
-    </div>
+            @if (editandoId) {
+              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                Modo edição
+              </span>
+            }
+          </div>
 
-    <div class="form-control">
-      <label for="data">Data</label>
-      <input id="data" type="date" name="data" [(ngModel)]="data" required />
-    </div>
+          @if (erro) {
+            <div class="alert alert-danger py-2 px-3 small mb-3">
+              {{ erro }}
+            </div>
+          }
 
-    <button class="btn-primary" type="submit" [disabled]="salvando">
-      {{ salvando ? 'Salvando...' : 'Salvar' }}
-    </button>
-  </form>
+          @if (editandoId) {
+            <p class="text-muted small mb-3">
+              Você está editando uma transação existente. Altere os campos e clique em
+              <strong>Atualizar</strong>, ou clique em <strong>Cancelar</strong> para voltar ao modo de criação.
+            </p>
+          }
 
-  @if (erro) {
-    <p class="erro">{{ erro }}</p>
-  }
-</section>
+          <form (ngSubmit)="salvar()" class="row g-3">
 
-<hr />
-
-<section class="card">
-  <h2>Lista de Transações</h2>
-
-  <button class="btn-secondary" (click)="carregar()" [disabled]="carregando">
-    {{ carregando ? 'Carregando...' : 'Recarregar' }}
-  </button>
-
-  @if (carregando) {
-    <p>Carregando...</p>
-  } @else {
-    @if (transacoes.length === 0) {
-      <p>Nenhuma transação encontrada.</p>
-    } @else {
-      <ul class="lista-transacoes">
-        @for (t of transacoes; track t._id) {
-          <li class="item-transacao">
-            <div>
-              <strong>{{ t.tipo }}</strong> — 
-              {{ t.nome }} — 
-              {{ t.categoria }} — 
-              R$ {{ t.valor }} — 
-              {{ t.data }}
+            <!-- Tipo -->
+            <div class="col-12">
+              <label for="tipo" class="form-label mb-1">Tipo</label>
+              <select
+                id="tipo"
+                name="tipo"
+                class="form-select"
+                [(ngModel)]="tipo"
+                required
+              >
+                <option value="" disabled selected>Selecione o tipo</option>
+                <option value="Receita">Receita</option>
+                <option value="Despesa">Despesa</option>
+              </select>
             </div>
 
-            <button class="btn-danger" (click)="excluir(t._id!)">
-              Excluir
-            </button>
-          </li>
-        }
-      </ul>
-    }
-  }
-</section>
+            <!-- Nome -->
+            <div class="col-12">
+              <label for="nome" class="form-label mb-1">Nome</label>
+              <input
+                id="nome"
+                name="nome"
+                class="form-control"
+                [(ngModel)]="nome"
+                required
+                placeholder="Digite seu Nome"
+              />
+            </div>
+
+            <!-- Valor & Data -->
+            <div class="col-12 col-md-6">
+              <label for="valor" class="form-label mb-1">Valor (R$)</label>
+              <input
+                id="valor"
+                type="number"
+                name="valor"
+                class="form-control"
+                [(ngModel)]="valor"
+                required
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="data" class="form-label mb-1">Data</label>
+              <input
+                id="data"
+                type="date"
+                name="data"
+                class="form-control"
+                [(ngModel)]="data"
+                required
+              />
+            </div>
+
+            <!-- Categoria -->
+            <div class="col-12">
+              <label for="categoria" class="form-label mb-1">Categoria</label>
+              <input
+                id="categoria"
+                name="categoria"
+                class="form-control"
+                [(ngModel)]="categoria"
+                required
+                placeholder="Ex.: Alimentação, Transporte, Lazer..."
+              />
+            </div>
+
+            <!-- Botões -->
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+              @if (editandoId) {
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="cancelarEdicao()"
+                  [disabled]="salvando"
+                >
+                  Cancelar
+                </button>
+              }
+
+              <button
+                class="btn btn-primary"
+                type="submit"
+                [disabled]="salvando || carregando"
+              >
+                @if (!salvando) {
+                  {{ editandoId ? 'Atualizar' : 'Salvar' }}
+                } @else {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  {{ editandoId ? 'Atualizando...' : 'Salvando...' }}
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna direita: Lista -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm border-0 card-lista">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Lista de Transações</h2>
+          </div>
+
+          @if (carregando) {
+            <div class="d-flex align-items-center gap-2 text-muted">
+              <span class="spinner-border spinner-border-sm" role="status"></span>
+              <span>Carregando transações...</span>
+            </div>
+          } @else {
+            @if (transacoes.length === 0) {
+              <p class="text-muted mb-0">
+                Nenhuma transação encontrada. Comece adicionando uma nova ao lado.
+              </p>
+            } @else {
+              <div class="table-responsive">
+
+
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Filtrar por categoria"
+                  [(ngModel)]="filtroCategoria"
+                  (ngModelChange)="aplicarFiltros()"
+                />
+              </div>
+
+              <div class="col-md-6">
+                <select
+                  class="form-select"
+                  [(ngModel)]="filtroTipo"
+                  (ngModelChange)="aplicarFiltros()"
+                >
+                  <option value="">Todos os tipos</option>
+                  <option value="Receita">Receita</option>
+                  <option value="Despesa">Despesa</option>
+                </select>
+              </div>
+            </div>
+          
+        <!-- SALDO -->
+          <div class="alert"
+              [ngClass]="saldo >= 0 ? 'alert-success' : 'alert-danger'">
+            <strong>Saldo:</strong> {{ saldo | currency:'BRL' }}
+          </div>
+
+                <table class="table align-middle mb-0 table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Nome</th>
+                      <th>Categoria</th>
+                      <th class="text-end">Valor</th>
+                      <th>Data</th>
+                      <th class="text-end">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (t of transacoes; track t._id) {
+                      <tr>
+                        <td>
+                          <span
+                            class="badge rounded-pill px-3"
+                            [ngClass]="t.tipo === 'Receita'
+                              ? 'bg-success-subtle text-success-emphasis border border-success-subtle'
+                              : 'bg-danger-subtle text-danger-emphasis border border-danger-subtle'"
+                          >
+                            {{ t.tipo | titlecase }}
+                          </span>
+                        </td>
+                        <td class="fw-semibold">
+                          {{ t.nome }}
+                        </td>
+                        <td>
+                          <!-- Traz cores para as Categorias     -->
+                          <span class="badge rounded-pill px-3"
+                                [ngClass]="categoriaClasse(t.categoria)">
+                            {{ t.categoria }}
+                          </span>
+
+                        </td>
+                        <td class="text-end fw-semibold">
+                          {{ t.valor }}
+                        </td>
+                        <td>
+                          {{ t.data | date:'dd/MM/yyyy' }}
+                        </td>
+                        <td class="text-end">
+                          <button
+                            class="btn btn-sm btn-outline-primary me-2"
+                            (click)="iniciarEdicao(t)"
+                          >
+                            Editar
+                          </button>
+
+                          <button
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="excluir(t._id!)"
+                          >
+                            Excluir
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
