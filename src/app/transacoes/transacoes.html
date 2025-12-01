@@ -1,0 +1,76 @@
+<h1>Transações</h1>
+
+<section class="card">
+  <h2>Nova Transação</h2>
+
+  <form (ngSubmit)="criar()" class="form-grid">
+    <div class="form-control">
+      <label for="tipo">Tipo</label>
+      <input id="tipo" name="tipo" [(ngModel)]="tipo" required />
+    </div>
+
+    <div class="form-control">
+      <label for="nome">Nome</label>
+      <input id="nome" name="nome" [(ngModel)]="nome" required />
+    </div>
+
+    <div class="form-control">
+      <label for="valor">Valor</label>
+      <input id="valor" type="number" name="valor" [(ngModel)]="valor" required />
+    </div>
+
+    <div class="form-control">
+      <label for="categoria">Categoria</label>
+      <input id="categoria" name="categoria" [(ngModel)]="categoria" required />
+    </div>
+
+    <div class="form-control">
+      <label for="data">Data</label>
+      <input id="data" type="date" name="data" [(ngModel)]="data" required />
+    </div>
+
+    <button class="btn-primary" type="submit" [disabled]="salvando">
+      {{ salvando ? 'Salvando...' : 'Salvar' }}
+    </button>
+  </form>
+
+  @if (erro) {
+    <p class="erro">{{ erro }}</p>
+  }
+</section>
+
+<hr />
+
+<section class="card">
+  <h2>Lista de Transações</h2>
+
+  <button class="btn-secondary" (click)="carregar()" [disabled]="carregando">
+    {{ carregando ? 'Carregando...' : 'Recarregar' }}
+  </button>
+
+  @if (carregando) {
+    <p>Carregando...</p>
+  } @else {
+    @if (transacoes.length === 0) {
+      <p>Nenhuma transação encontrada.</p>
+    } @else {
+      <ul class="lista-transacoes">
+        @for (t of transacoes; track t._id) {
+          <li class="item-transacao">
+            <div>
+              <strong>{{ t.tipo }}</strong> — 
+              {{ t.nome }} — 
+              {{ t.categoria }} — 
+              R$ {{ t.valor }} — 
+              {{ t.data }}
+            </div>
+
+            <button class="btn-danger" (click)="excluir(t._id!)">
+              Excluir
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

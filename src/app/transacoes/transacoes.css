@@ -1,0 +1,79 @@
+h1 {
+  margin-bottom: 20px;
+}
+
+.card {
+  padding: 20px;
+  border-radius: 10px;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  margin-bottom: 30px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-control label {
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #0077ff;
+  color: white;
+}
+
+.btn-primary:disabled {
+  background: #8cbcff;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+}
+
+.btn-danger {
+  background: #d62828;
+  color: white;
+}
+
+.erro {
+  color: red;
+  margin-top: 10px;
+}
+
+.lista-transacoes {
+  margin-top: 15px;
+  padding: 0;
+  list-style: none;
+}
+
+.item-transacao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
